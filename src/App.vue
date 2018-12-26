@@ -1,60 +1,143 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank">Twitter</a></li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li><a href="http://router.vuejs.org/" target="_blank">vue-router</a></li>
-      <li><a href="http://vuex.vuejs.org/" target="_blank">vuex</a></li>
-      <li><a href="http://vue-loader.vuejs.org/" target="_blank">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank">awesome-vue</a></li>
-    </ul>
+    <div class="ten">
+      11324
+    </div>
+    <div class="eighty">
+      <page 
+          v-for="link in availLinks" 
+          v-bind:key="link.id"
+          :src="link.link"
+          v-show="link.id == currentPage">
+      </page>
+      
+      <div class="absolute" ref="arrowsRef">
+        <prev @click.native="prevPage" :page="currentPage"></prev>
+        <next @click.native="nextPage" :page="currentPage"></next>
+      </div>
+    </div>
+    <div class="ten">
+      11324
+    </div>
   </div>
 </template>
 
 <script>
+import 'whatwg-fetch';
+import Page from './Page.vue';
+import Next from './Next.vue';
+import Prev from './Prev.vue';
+
 export default {
   name: 'app',
+  components: {
+    Page,
+    Next,
+    Prev,
+  },
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      currentPage: 0,
+      links: [],
+      availLinks: [],
     }
-  }
+  },
+  computed: {
+    numberOfPages: function() {
+      return this.links.length;
+    }
+  },
+  mounted() {
+    // TO DO load chapter by ID
+    this.loadChapter(1050);
+
+    window.onscroll = (e) => {
+      let vertical_position = 0;
+      if (pageYOffset)//usual
+        vertical_position = pageYOffset;
+      else if (document.documentElement.clientHeight)//ie
+        vertical_position = document.documentElement.scrollTop;
+      else if (document.body)//ie quirks
+        vertical_position = document.body.scrollTop;
+      
+      this.$refs['arrowsRef'].style.top = vertical_position + 'px';
+    }
+  },
+  methods: {
+    loadChapter: function(id) {
+      //fetch('https://risens.team/risensteam/api/chapter.php?id=' + id)
+      fetch('fake.html')
+      .then(function(response) {
+        if (response.ok) {
+          return response.json();
+        }
+        else {
+          //TO DO repeat
+        }
+      }).then((json) => {
+        json.forEach((elem, index) => {
+          this.links.push({
+            link: elem,
+            id: index,
+          });
+        });
+        this.availLinks = this.links.slice(0, 3);
+        this.currentPage = this.links[0].id;
+      })
+    },
+    nextPage: function() {
+      if (this.currentPage < this.numberOfPages - 1) {
+        this.currentPage++;
+        this.computeAvailLinks();
+      } 
+      else {
+        // TO DO Next Chapter
+      }
+    },
+    prevPage: function() {
+      if (this.currentPage > 0) {
+        this.currentPage--;
+        this.computeAvailLinks();
+      }
+      else {
+        // TO DO Prev Chapter
+      }
+    },
+    computeAvailLinks: function() {
+      let startAvail = this.currentPage;
+      let endAvail = startAvail + 3;
+      if (startAvail == 1) {
+        startAvail = 0;
+        endAvail = 4;
+      }
+      else if (startAvail != 0) {
+        startAvail -= 2;
+      }
+
+      this.availLinks = this.links.slice(startAvail, endAvail);
+    }
+  },
 }
 </script>
 
 <style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-
-h1, h2 {
-  font-weight: normal;
-}
-
-ul {
-  list-style-type: none;
+#app, body {
   padding: 0;
+  margin: 0;
+  height: 100vh;
 }
-
-li {
-  display: inline-block;
-  margin: 0 10px;
+.absolute {
+  position: absolute;
+  top: 5vh;
+  left: 0;
+  height: 90vh;
+  width: 100vw;
 }
-
-a {
-  color: #42b983;
+.ten {
+  height: 5vh;
+}
+.eighty {
+  height: 90vh;
+  text-align: center;
 }
 </style>
