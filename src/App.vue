@@ -1,22 +1,21 @@
 <template>
   <div id="app">
-    <div class="ten">
-      11324
+    <div class="text-center">
+      <page-selector
+        :pages="links"
+        :currentPageProp="currentPage"
+      ></page-selector>
     </div>
-    <div class="eighty">
+    <div class="text-center">
       <page 
           v-for="link in availLinks" 
           v-bind:key="link.id"
           :src="link.link"
-          v-show="link.id == currentPage">
+          v-show="link.id == currentPage"
+          @click.native="imageOnClick">
       </page>
-      
-      <div class="absolute" ref="arrowsRef">
-        <prev @click.native="prevPage" :page="currentPage"></prev>
-        <next @click.native="nextPage" :page="currentPage"></next>
-      </div>
     </div>
-    <div class="ten">
+    <div class="text-center">
       11324
     </div>
   </div>
@@ -25,15 +24,13 @@
 <script>
 import 'whatwg-fetch';
 import Page from './Page.vue';
-import Next from './Next.vue';
-import Prev from './Prev.vue';
+import PageSelector from './PageSelector';
 
 export default {
   name: 'app',
   components: {
     Page,
-    Next,
-    Prev,
+    PageSelector,
   },
   data () {
     return {
@@ -48,20 +45,14 @@ export default {
     }
   },
   mounted() {
+    this.$on('ChangePage', page => {
+        this.currentPage = page;
+        this.computeAvailLinks();
+    });
+
+
     // TO DO load chapter by ID
     this.loadChapter(1050);
-
-    window.onscroll = (e) => {
-      let vertical_position = 0;
-      if (pageYOffset)//usual
-        vertical_position = pageYOffset;
-      else if (document.documentElement.clientHeight)//ie
-        vertical_position = document.documentElement.scrollTop;
-      else if (document.body)//ie quirks
-        vertical_position = document.body.scrollTop;
-      
-      this.$refs['arrowsRef'].style.top = vertical_position + 'px';
-    }
   },
   methods: {
     loadChapter: function(id) {
@@ -89,6 +80,7 @@ export default {
       if (this.currentPage < this.numberOfPages - 1) {
         this.currentPage++;
         this.computeAvailLinks();
+        this.smoothScroll();
       } 
       else {
         // TO DO Next Chapter
@@ -98,6 +90,7 @@ export default {
       if (this.currentPage > 0) {
         this.currentPage--;
         this.computeAvailLinks();
+        this.smoothScroll();
       }
       else {
         // TO DO Prev Chapter
@@ -115,7 +108,31 @@ export default {
       }
 
       this.availLinks = this.links.slice(startAvail, endAvail);
-    }
+    },
+    imageOnClick: function(e) {
+      if (e.offsetX === undefined ||
+          e.path === undefined ||
+          !Array.isArray(e.path) ||
+          e.path[0] === undefined) {
+        return;
+      }
+      const xAxisClick = e.offsetX;
+      const imageWidth = e.path[0].width;
+
+      if (xAxisClick >= Math.floor(imageWidth / 2)) {
+        this.nextPage();
+      }
+      else {
+        this.prevPage();
+      }
+    },
+    smoothScroll: function(){
+      let currentScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      if (currentScroll > 0) {
+          window.requestAnimationFrame(this.smoothScroll);
+          window.scrollTo (0,currentScroll - (currentScroll/5));
+      }
+    },
   },
 }
 </script>
@@ -125,6 +142,7 @@ export default {
   padding: 0;
   margin: 0;
   height: 100vh;
+  width: 100wv;
 }
 .absolute {
   position: absolute;
@@ -136,8 +154,7 @@ export default {
 .ten {
   height: 5vh;
 }
-.eighty {
-  height: 90vh;
+.text-center {
   text-align: center;
 }
 </style>

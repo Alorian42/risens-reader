@@ -25,21 +25,14 @@ export default {
     
   },
   mounted () {
-    this.$refs['img'].onload = () => {
-      console.log(this.$refs['img'].width, this.$refs['img'].height);
-      if (this.$refs['img'].width > this.$refs['img'].height) {
-        this.$refs['img'].style.width = "100%";
-      }
-      else {
-        this.$refs['img'].style.height = "100%";
-      }
-      console.log(this.$refs['img'].width, this.$refs['img'].height);
-    };
+    
   }
 }
 </script>
 <style lang="scss">
 img {
-  
+  cursor: pointer;
+  max-width: 100%;
+  height: auto;
 }
 </style>
