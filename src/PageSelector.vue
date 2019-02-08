@@ -3,7 +3,7 @@
     <option 
           v-for="page in pages" 
           v-bind:key="page.id"
-          :value="page.id"> {{ page.id }}</option>
+          :value="page.id"> {{ page.id + 1 }}</option>
   </select>
 </template>
 <script>
