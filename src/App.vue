@@ -1,12 +1,20 @@
 <template>
   <div id="app">
-    <div class="text-center">
+    <div class="text-center controls head">
+      <arrow
+      :isRight=false
+      @click.native="prevPage">
+      </arrow>
       <page-selector
         :pages="links"
         :currentPageProp="currentPage"
       ></page-selector>
+      <arrow
+      :isRight=true
+      @click.native="nextPage">
+      </arrow>
     </div>
-    <div class="text-center">
+    <div class="text-center content">
       <page 
           v-for="link in availLinks" 
           v-bind:key="link.id"
@@ -15,8 +23,17 @@
           @click.native="imageOnClick">
       </page>
     </div>
-    <div class="text-center">
-      11324
+    <div class="text-center controls bottom">
+      <arrow
+      :isRight=false>
+      </arrow>
+      <page-selector
+        :pages="links"
+        :currentPageProp="currentPage"
+      ></page-selector>
+      <arrow
+      :isRight=true>
+      </arrow>
     </div>
   </div>
 </template>
@@ -25,12 +42,14 @@
 import 'whatwg-fetch';
 import Page from './Page.vue';
 import PageSelector from './PageSelector';
+import Arrow from './Arrow';
 
 export default {
   name: 'app',
   components: {
     Page,
     PageSelector,
+    Arrow
   },
   data () {
     return {
@@ -141,20 +160,32 @@ export default {
 #app, body {
   padding: 0;
   margin: 0;
-  height: 100vh;
-  width: 100wv;
-}
-.absolute {
-  position: absolute;
-  top: 5vh;
-  left: 0;
-  height: 90vh;
   width: 100vw;
 }
+
 .ten {
   height: 5vh;
 }
+
 .text-center {
   text-align: center;
+}
+
+.controls {
+  background-color: #eb5424;
+}
+
+.bottom {
+  width: 100%;
+}
+
+.head {
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.content {
+  margin-top: 10vh;
 }
 </style>
