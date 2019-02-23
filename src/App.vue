@@ -269,6 +269,10 @@ export default {
 .controls {
   background-color: #eb5424;
   height: 50px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .bottom {
