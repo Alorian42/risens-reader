@@ -25,14 +25,16 @@
     </div>
     <div class="text-center controls bottom">
       <arrow
-      :isRight=false>
+      :isRight=false
+      @click.native="nextChapter">
       </arrow>
       <page-selector
         :pages="links"
         :currentPageProp="currentPage"
       ></page-selector>
       <arrow
-      :isRight=true>
+      :isRight=true
+      @click.native="prevChapter">
       </arrow>
     </div>
   </div>
@@ -152,6 +154,12 @@ export default {
           window.scrollTo (0,currentScroll - (currentScroll/5));
       }
     },
+    nextChapter: function() {
+      //TO DO next chapter
+    },
+    prevChapter: function() {
+      //TO DO prev chapter
+    }
   },
 }
 </script>
@@ -173,9 +181,12 @@ export default {
 
 .controls {
   background-color: #eb5424;
+  height: 50px;
 }
 
 .bottom {
+  position: absolute;
+  bottom: 0;
   width: 100%;
 }
 
@@ -186,6 +197,7 @@ export default {
 }
 
 .content {
-  margin-top: 10vh;
+  margin-top: 50px;
+  height: calc(100vh - 100px);
 }
 </style>

@@ -35,8 +35,9 @@ export default {
 .arrow {
   display: inline-block;
   width: 20vw;
-  font-size: 4rem;
-  line-height: 4rem;
+  font-size: 45px;
+  height: 100%;
+  line-height: 100%;
   vertical-align: middle;
   cursor: pointer;
   color: white;
