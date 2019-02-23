@@ -1,12 +1,12 @@
 <template>
-  <select @change="pageSelected()" v-model="currentPage">
-    <option 
-          v-for="page in pages" 
-          v-bind:key="page.id"
-          :value="page.id"> {{ page.id + 1 }}</option>
-  </select>
+  <v-select-p 
+    :onChange="pageSelected" 
+    v-model="currentPage"
+    :options="options"></v-select-p>
 </template>
 <script>
+import vSelectP from 'vue-select'
+
 export default {
   props: {
     pages: {
@@ -27,17 +27,43 @@ export default {
   computed: {
     currentPage:   {
       get: function() {
-        return this.currentPageProp;
+        if (this.pages[this.currentPageProp] !== undefined) {
+          return {
+            value: this.currentPageProp,
+            label: this.pages[this.currentPageProp].id + 1
+          };
+        }
+        else {
+          return 0;
+        }
       },
       set: function(newValue) {
         this.tempValue = newValue;
       }
+    },
+    options: function() {
+      let array = [];
+
+      this.pages.forEach((elem, index) => {
+        array.push({
+          value: index,
+          label: elem.id + 1
+        });
+      });
+
+      return array;
     }
   },
   methods: {
-    pageSelected: function(e) {
-      if (this.tempValue != this.currentPageProp) {
-        this.$parent.$emit('ChangePage', this.tempValue);
+    pageSelected: function(val) {
+      if (val === null || val === undefined) {
+        val = {
+          value: 0
+        }
+      }
+
+      if (val.value != this.currentPageProp) {
+        this.$parent.$emit('ChangePage', val.value);
       }
     }
   },
@@ -46,6 +72,9 @@ export default {
   },
   mounted () {
     
+  },
+  components: {
+    vSelectP
   }
 }
 </script>
@@ -53,5 +82,10 @@ export default {
 select {
   padding: 10px;
   margin: 5px;
+}
+
+.head .v-select {
+  width: 100px;
+  background-color: white;
 }
 </style>
