@@ -26,31 +26,42 @@
     <div class="text-center controls bottom">
       <arrow
       :isRight=false
-      @click.native="nextChapter">
+      @click.native="prevChapter">
       </arrow>
-      <page-selector
-        :pages="links"
-        :currentPageProp="currentPage"
-      ></page-selector>
+      <chapter-selector
+        :chapters="chapters"
+        :currentChapterProp="currentChapter"
+      ></chapter-selector>
       <arrow
       :isRight=true
-      @click.native="prevChapter">
+      @click.native="nextChapter">
       </arrow>
     </div>
   </div>
 </template>
 
 <script>
+import Vue from 'vue';
 import 'whatwg-fetch';
+import VueRouter from 'vue-router'
 import Page from './Page.vue';
 import PageSelector from './PageSelector';
+import ChapterSelector from './ChapterSelector';
 import Arrow from './Arrow';
+
+Vue.use(VueRouter);
+var router = new VueRouter({
+    mode: 'history',
+    routes: []
+});
 
 export default {
   name: 'app',
+  router,
   components: {
     Page,
     PageSelector,
+    ChapterSelector,
     Arrow
   },
   data () {
@@ -58,6 +69,9 @@ export default {
       currentPage: 0,
       links: [],
       availLinks: [],
+      id: false,
+      currentChapter: 0,
+      chapters: [],
     }
   },
   computed: {
@@ -70,32 +84,48 @@ export default {
         this.currentPage = page;
         this.computeAvailLinks();
     });
+    this.$on('ChangeChapter', chapter => {
+        this.currentChapter = parseInt(chapter);
+        if (this.chapters[this.currentChapter] !== undefined) {
+          this.loadChapter(this.chapters[this.currentChapter].id);
+        }
+    });
 
+    const query = this.$route.query;
+    let chapterId = false;
 
-    // TO DO load chapter by ID
-    this.loadChapter(1050);
+    if (query.chapter_id !== null && query.chapter_id !== undefined) {
+      chapterId = query.chapter_id;
+    }
+
+    if (query.id !== null && query.id !== undefined) {
+      this.id = query.id;
+      this.getChapters(this.id, chapterId);
+    }
   },
   methods: {
     loadChapter: function(id) {
-      //fetch('https://risens.team/risensteam/api/chapter.php?id=' + id)
-      fetch('fake.html')
+      fetch('https://risens.team/risensteam/api/chapter.php?id=' + id)
       .then(function(response) {
         if (response.ok) {
           return response.json();
         }
         else {
-          //TO DO repeat
+          setTimeout(() => this.loadChapter(this.id), 2000);
         }
       }).then((json) => {
+        this.links = [];
+
         json.forEach((elem, index) => {
           this.links.push({
             link: elem,
             id: index,
           });
         });
+        
         this.availLinks = this.links.slice(0, 3);
         this.currentPage = this.links[0].id;
-      })
+      });
     },
     nextPage: function() {
       if (this.currentPage < this.numberOfPages - 1) {
@@ -104,7 +134,7 @@ export default {
         this.smoothScroll();
       } 
       else {
-        // TO DO Next Chapter
+        this.nextChapter();
       }
     },
     prevPage: function() {
@@ -114,7 +144,7 @@ export default {
         this.smoothScroll();
       }
       else {
-        // TO DO Prev Chapter
+        this.prevChapter();
       }
     },
     computeAvailLinks: function() {
@@ -147,18 +177,75 @@ export default {
         this.prevPage();
       }
     },
-    smoothScroll: function(){
+    smoothScroll: function() {
       let currentScroll = document.documentElement.scrollTop || document.body.scrollTop;
       if (currentScroll > 0) {
           window.requestAnimationFrame(this.smoothScroll);
           window.scrollTo (0,currentScroll - (currentScroll/5));
       }
     },
+    getChapters: function(id, chapterId = false) {
+      fetch('https://risens.team/risensteam/api/manga.php?id=' + id)
+      .then(function(response) {
+        if (response.ok) {
+          return response.json();
+        }
+        else {
+          setTimeout(() => this.getChapters(this.id), 2000);
+        }
+      }).then((json) => {
+        let tempChapters = [];
+        json.forEach((elem, index) => {
+          tempChapters.push({
+            name: elem.name,
+            id: elem.id,
+            order: parseFloat(elem.chapter),
+          });
+        });
+
+        tempChapters.sort((a, b) => {
+          if (a.order < b.order) {
+            return -1;
+          }
+          if (a.order > b.order) {
+            return 1;
+          }
+
+          return 0;
+        });
+
+        this.chapters = tempChapters;
+
+        if (chapterId !== false) {
+          const tempIndex = this.chapters.findIndex(x => x.id == chapterId);
+          if (tempIndex !== -1) {
+            this.currentChapter = tempIndex;
+          }
+          else {
+            this.currentChapter = this.chapters.length - 1;
+          }
+        }
+        else {
+          this.currentChapter = this.chapters.length - 1;
+        }
+
+        this.loadChapter(this.chapters[this.currentChapter].id);
+      });
+    },
     nextChapter: function() {
-      //TO DO next chapter
+      let next = this.currentChapter + 1;
+      if (this.chapters[next] !== undefined) {
+        this.currentChapter = next;
+        this.loadChapter(this.chapters[this.currentChapter].id);
+      }
     },
     prevChapter: function() {
-      //TO DO prev chapter
+      let next = this.currentChapter - 1;
+      
+      if (this.chapters[next] !== undefined) {
+        this.currentChapter = next;
+        this.loadChapter(this.chapters[this.currentChapter].id);
+      }
     }
   },
 }
