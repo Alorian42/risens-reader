@@ -1,11 +1,22 @@
 <template>
-  <span class="text-center arrow">{{ arrow }}</span>
+  <span class="text-center arrow" v-bind:style="arrowColor">
+    <i class="fas" v-bind:class="arrow" v-bind:title="alt"></i>
+  </span>
 </template>
 <script>
 export default {
   props: {
     isRight: {
       type: Boolean,
+    },
+    disabled: {
+      type: Boolean
+    },
+    doubleArrows: {
+      type: Boolean
+    },
+    alt: {
+      type: String
     },
 
   },
@@ -17,7 +28,15 @@ export default {
   },
   computed: {
     arrow: function() {
-      return this.isRight ? '⮕' : '⬅';
+      return this.isRight ?
+        this.doubleArrows ? 'fa-angle-double-right' : 'fa-angle-right' : 
+        this.doubleArrows ? 'fa-angle-double-left' : 'fa-angle-left';
+    },
+    arrowColor: function() {
+      return {
+        color: this.disabled ? '#e67b7b' : 'white',
+        cursor: this.disabled ? 'not-allowed' : 'pointer',
+      };
     }
   },
   methods: {

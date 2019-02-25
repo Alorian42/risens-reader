@@ -1,5 +1,6 @@
 <template>
   <v-select-p 
+    maxHeight="250px"
     :onChange="pageSelected" 
     v-model="currentPage"
     :options="options"></v-select-p>

@@ -1,5 +1,6 @@
 <template>
   <v-select 
+    maxHeight="250px"
     :onChange="chapterSelected" 
     v-model="currentChapter"
     :options="options"></v-select>
@@ -94,5 +95,9 @@ select {
 }
 .clear {
   display: none;
+}
+
+.dropdown {
+  border-radius: 5px;
 }
 </style>
