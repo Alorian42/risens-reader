@@ -2,39 +2,60 @@
   <div id="app">
     <div class="text-center controls head">
       <arrow
-      :isRight=false
-      @click.native="prevPage">
+        alt="Предыдущая страница"
+        :isRight=false
+        :disabled="this.currentPage === 0 && this.chapters[this.currentChapter - 1] === undefined"
+        @click.native="prevPage">
       </arrow>
       <page-selector
         :pages="links"
         :currentPageProp="currentPage"
       ></page-selector>
       <arrow
-      :isRight=true
-      @click.native="nextPage">
+        alt="Следующая страница"
+        :isRight=true
+        :disabled="this.currentPage === this.numberOfPages - 1 && this.chapters[this.currentChapter + 1] === undefined"
+        @click.native="nextPage">
       </arrow>
     </div>
     <div class="text-center content">
       <page 
-          v-for="link in availLinks" 
-          v-bind:key="link.id"
-          :src="link.link"
-          v-show="link.id == currentPage"
-          @click.native="imageOnClick">
+        v-for="link in availLinks" 
+        v-bind:key="link.id"
+        :src="link.link"
+        v-show="link.id == currentPage"
+        @click.native="imageOnClick">
       </page>
     </div>
     <div class="text-center controls bottom">
       <arrow
-      :isRight=false
-      @click.native="prevChapter">
+        alt="Предыдущая глава"
+        :isRight=false
+        :doubleArrows=true
+        :disabled="this.chapters[this.currentChapter - 1] === undefined"
+        @click.native="prevChapter">
       </arrow>
+      
+      <div
+        @click="alertError"
+      >
+        <i title="Сообщить об ошибке" class="fas fa-exclamation-triangle alert-icon"></i>
+      </div>
       <chapter-selector
         :chapters="chapters"
         :currentChapterProp="currentChapter"
       ></chapter-selector>
+      <div
+        @click="downloadChapter"
+      >
+        <i title="Скачать" class="fas fa-cloud-download-alt download-icon"></i>
+      </div>
       <arrow
-      :isRight=true
-      @click.native="nextChapter">
+        alt="Следующая глава"
+        :isRight=true
+        :doubleArrows=true
+        :disabled="this.chapters[this.currentChapter + 1] === undefined"
+        @click.native="nextChapter">
       </arrow>
     </div>
   </div>
@@ -48,6 +69,8 @@ import Page from './Page.vue';
 import PageSelector from './PageSelector';
 import ChapterSelector from './ChapterSelector';
 import Arrow from './Arrow';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 Vue.use(VueRouter);
 var router = new VueRouter({
@@ -246,7 +269,67 @@ export default {
         this.currentChapter = next;
         this.loadChapter(this.chapters[this.currentChapter].id);
       }
-    }
+    },
+    downloadChapter: function() {
+      let urls = [];
+      let zipName = this.chapters[this.currentChapter].name + '.zip';
+
+      this.links.forEach(elem => {
+        urls.push(elem.link);
+      });
+
+      var zip = new JSZip();
+
+      var promise = function(url, index) {
+        return new Promise(function(resolve) {
+          var httpRequest = new XMLHttpRequest();
+          httpRequest.open("GET", url);
+          httpRequest.responseType = 'blob';
+
+          httpRequest.onload = function() {
+            let reader = new FileReader();
+            reader.onloadend = function() {
+              let res = this.result;
+              let ext = 'jpg';
+              if (res.includes('data:image/png;base64')) {
+                  ext = 'png';
+              }
+              res = res.split(',', 2)[1];
+
+              let stringIndex = index + 1;
+
+              stringIndex = (stringIndex <= 9) ? '0' + stringIndex : stringIndex;
+              zip.file(stringIndex + '.' + ext, res, {base64: true});
+              resolve();
+            }
+            reader.readAsDataURL(this.response);
+          }
+
+          httpRequest.send();
+        });
+      };
+
+      Promise.all(urls.map(function(url, index) {
+          return promise(url, index)
+        }.bind(this)))
+        .then(function() {
+          zip.generateAsync({
+              type: "blob"
+          })
+          .then(function(content) {
+            saveAs(content, zipName);
+          });
+      });
+    },
+    alertError: function() {
+      const message = prompt('С какой ошибкой вы столкнулись');
+      
+      fetch('https://risens.team/risensteam/api/message.php?message=' + encodeURIComponent(message) +
+            '&chapter_id=' + this.chapters[this.currentChapter].id + '&manga_id=' + this.id)
+      .then(function(response) {
+        alert('Спасибо!');
+      });
+    },
   },
 }
 </script>
@@ -290,5 +373,19 @@ export default {
 .content {
   margin-top: 50px;
   height: calc(100vh - 100px);
+}
+
+.alert-icon {
+  margin-right: 10px;
+  color: white;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+.download-icon {
+  margin-left: 10px;
+  color: white;
+  font-size: 25px;
+  cursor: pointer;
 }
 </style>
