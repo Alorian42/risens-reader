@@ -45,11 +45,6 @@
         :chapters="chapters"
         :currentChapterProp="currentChapter"
       ></chapter-selector>
-      <div
-        @click="downloadChapter"
-      >
-        <i title="Скачать" class="fas fa-cloud-download-alt download-icon"></i>
-      </div>
       <arrow
         alt="Следующая глава"
         :isRight=true
@@ -269,57 +264,6 @@ export default {
         this.currentChapter = next;
         this.loadChapter(this.chapters[this.currentChapter].id);
       }
-    },
-    downloadChapter: function() {
-      let urls = [];
-      let zipName = this.chapters[this.currentChapter].name + '.zip';
-
-      this.links.forEach(elem => {
-        urls.push(elem.link);
-      });
-
-      var zip = new JSZip();
-
-      var promise = function(url, index) {
-        return new Promise(function(resolve) {
-          var httpRequest = new XMLHttpRequest();
-          httpRequest.open("GET", url);
-          httpRequest.responseType = 'blob';
-
-          httpRequest.onload = function() {
-            let reader = new FileReader();
-            reader.onloadend = function() {
-              let res = this.result;
-              let ext = 'jpg';
-              if (res.includes('data:image/png;base64')) {
-                  ext = 'png';
-              }
-              res = res.split(',', 2)[1];
-
-              let stringIndex = index + 1;
-
-              stringIndex = (stringIndex <= 9) ? '0' + stringIndex : stringIndex;
-              zip.file(stringIndex + '.' + ext, res, {base64: true});
-              resolve();
-            }
-            reader.readAsDataURL(this.response);
-          }
-
-          httpRequest.send();
-        });
-      };
-
-      Promise.all(urls.map(function(url, index) {
-          return promise(url, index)
-        }.bind(this)))
-        .then(function() {
-          zip.generateAsync({
-              type: "blob"
-          })
-          .then(function(content) {
-            saveAs(content, zipName);
-          });
-      });
     },
     alertError: function() {
       const message = prompt('С какой ошибкой вы столкнулись');
