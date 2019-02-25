@@ -32,7 +32,11 @@ export default {
 <style lang="scss">
 img {
   cursor: pointer;
-  height: 100%;
+  max-height: calc(100vh - 100px);
   max-width: 100vw;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 </style>

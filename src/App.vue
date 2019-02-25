@@ -114,6 +114,18 @@ export default {
         }
     });
 
+    
+    window.onkeyup = e => {
+      let key = e.keyCode ? e.keyCode : e.which;
+      
+      if (key == 39) {
+        this.nextPage();
+      } 
+      else if (key == 37) {
+        this.prevPage();
+      }
+    }
+
     const query = this.$route.query;
     let chapterId = false;
 
@@ -323,6 +335,9 @@ export default {
     },
     alertError: function() {
       const message = prompt('С какой ошибкой вы столкнулись');
+      if (message === null) {
+        return;
+      }
       
       fetch('https://risens.team/risensteam/api/message.php?message=' + encodeURIComponent(message) +
             '&chapter_id=' + this.chapters[this.currentChapter].id + '&manga_id=' + this.id)
