@@ -45,11 +45,11 @@
         :chapters="chapters"
         :currentChapterProp="currentChapter"
       ></chapter-selector>
-      <div
+      <!--<div
         @click="downloadChapter"
       >
         <i title="Скачать" class="fas fa-cloud-download-alt download-icon"></i>
-      </div>
+      </div>-->
       <arrow
         alt="Следующая глава"
         :isRight=true
