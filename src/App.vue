@@ -240,16 +240,16 @@ export default {
 
         tempChapters.sort((a, b) => {
           if (a.order < b.order) {
-            return -1;
+            return 1;
           }
           if (a.order > b.order) {
-            return 1;
+            return -1;
           }
 
           return 0;
         });
-
-        this.chapters = tempChapters;
+        
+        this.chapters = tempChapters.reverse();
 
         if (chapterId !== false) {
           const tempIndex = this.chapters.findIndex(x => x.id == chapterId);
