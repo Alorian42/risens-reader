@@ -76,6 +76,7 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
+import Swal from 'sweetalert2'
 
 Vue.use(VueRouter);
 var router = new VueRouter({
@@ -91,7 +92,8 @@ export default {
     PageSelector,
     ChapterSelector,
     Arrow,
-    Loading
+    Loading,
+    Swal
   },
   data () {
     return {
@@ -381,15 +383,20 @@ export default {
       });
     },
     alertError: function() {
-      const message = prompt('С какой ошибкой вы столкнулись');
-      if (message === null) {
-        return;
-      }
-      
-      fetch('https://risens.team/risensteam/api/message.php?message=' + encodeURIComponent(message) +
-            '&chapter_id=' + this.chapters[this.currentChapter].id + '&manga_id=' + this.id)
-      .then(function(response) {
-        alert('Спасибо!');
+      Swal.fire({
+        input: 'textarea',
+        title: 'С какой ошибкой вы столкнулись?',
+        inputPlaceholder: 'Опишите вашу проблему...',
+        showCancelButton: true
+      }).then((response) => {
+        const message = response.value;
+        if (message) {
+          fetch('https://risens.team/risensteam/api/message.php?message=' + encodeURIComponent(message) +
+              '&chapter_id=' + this.chapters[this.currentChapter].id + '&manga_id=' + this.id)
+          .then(function(response) {
+            alert('Спасибо!');
+          });
+        }
       });
     },
   },
