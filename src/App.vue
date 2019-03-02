@@ -1,5 +1,8 @@
 <template>
   <div id="app">
+    <loading :active.sync="isLoading" 
+        :can-cancel="false" 
+        :is-full-page="true"></loading>
     <div class="text-center controls head">
       <arrow
         alt="Предыдущая страница"
@@ -45,11 +48,11 @@
         :chapters="chapters"
         :currentChapterProp="currentChapter"
       ></chapter-selector>
-      <!--<div
+      <div
         @click="downloadChapter"
       >
         <i title="Скачать" class="fas fa-cloud-download-alt download-icon"></i>
-      </div>-->
+      </div>
       <arrow
         alt="Следующая глава"
         :isRight=true
@@ -71,6 +74,8 @@ import ChapterSelector from './ChapterSelector';
 import Arrow from './Arrow';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+import Loading from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/vue-loading.css';
 
 Vue.use(VueRouter);
 var router = new VueRouter({
@@ -85,7 +90,8 @@ export default {
     Page,
     PageSelector,
     ChapterSelector,
-    Arrow
+    Arrow,
+    Loading
   },
   data () {
     return {
@@ -95,6 +101,7 @@ export default {
       id: false,
       currentChapter: 0,
       chapters: [],
+      isLoading: true
     }
   },
   computed: {
@@ -140,6 +147,7 @@ export default {
   },
   methods: {
     loadChapter: function(id) {
+      this.isLoading = true;
       fetch('https://risens.team/risensteam/api/chapter.php?id=' + id)
       .then(function(response) {
         if (response.ok) {
@@ -160,6 +168,7 @@ export default {
         
         this.availLinks = this.links.slice(0, 3);
         this.currentPage = this.links[0].id;
+        this.isLoading = false;
       });
     },
     nextPage: function() {
@@ -220,6 +229,7 @@ export default {
       }
     },
     getChapters: function(id, chapterId = false) {
+      this.isLoading = true;
       fetch('https://risens.team/risensteam/api/manga.php?id=' + id)
       .then(function(response) {
         if (response.ok) {
@@ -283,6 +293,7 @@ export default {
       }
     },
     downloadChapter: function() {
+      this.isLoading = true;
       let urls = [];
       let zipName = this.chapters[this.currentChapter].name + '.zip';
 
@@ -294,6 +305,41 @@ export default {
 
       var promise = function(url, index) {
         return new Promise(function(resolve) {
+
+          let myHeaders = new Headers();
+          myHeaders.set("Origin", "https://risens.team/");
+
+          const myInit = { 
+            method: 'GET',
+            headers: myHeaders,
+            mode: 'cors',
+            cache: 'default' 
+          };
+
+          url = url.replace('https://storage.yandexcloud.net/rt-manga/Manga%2F', 'https://risens.team/risensteam/vipdl_manga.php?path=');
+
+          fetch(url, myInit).then(function(response) {
+            return response.blob();
+          }).then(function(blob) {
+            let reader = new FileReader();
+            reader.onloadend = function() {
+              let res = this.result;
+              let ext = 'jpg';
+              if (res.includes('data:image/png;base64')) {
+                  ext = 'png';
+              }
+              res = res.split(',', 2)[1];
+
+              let stringIndex = index + 1;
+
+              stringIndex = (stringIndex <= 9) ? '0' + stringIndex : stringIndex;
+              zip.file(stringIndex + '.' + ext, res, {base64: true});
+              resolve();
+            }
+            
+            reader.readAsDataURL(blob);
+          });
+/*
           var httpRequest = new XMLHttpRequest();
           httpRequest.open("GET", url);
           httpRequest.responseType = 'blob';
@@ -317,19 +363,20 @@ export default {
             reader.readAsDataURL(this.response);
           }
 
-          httpRequest.send();
+          httpRequest.send();*/
         });
       };
 
-      Promise.all(urls.map(function(url, index) {
+      Promise.all(urls.map((url, index) => {
           return promise(url, index)
-        }.bind(this)))
-        .then(function() {
+        }))
+        .then(() => {
           zip.generateAsync({
               type: "blob"
           })
-          .then(function(content) {
+          .then((content) => {
             saveAs(content, zipName);
+            this.isLoading = false;
           });
       });
     },
