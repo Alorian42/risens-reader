@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" v-bind:class="{ night: isNightMode }">
     <loading :active.sync="isLoading" 
         :can-cancel="false" 
         :is-full-page="true"></loading>
@@ -76,9 +76,11 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
-import Swal from 'sweetalert2'
+import Swal from 'sweetalert2';
+import VueCookies from 'vue-cookies';
 
 Vue.use(VueRouter);
+Vue.use(VueCookies);
 var router = new VueRouter({
     mode: 'history',
     routes: []
@@ -105,11 +107,16 @@ export default {
       chapters: [],
       isLoading: true,
       isVip: false,
+      forceNightMode: false,
     }
   },
   computed: {
     numberOfPages: function() {
       return this.links.length;
+    },
+    isNightMode: function() {
+      const n = $cookies.get('night');
+      return n == 'yes' || this.forceNightMode;
     }
   },
   mounted() {
@@ -156,6 +163,10 @@ export default {
     }
   },
   methods: {
+    checkNightMode: function() {
+      const n = $cookies.get('night');
+      this.forceNightMode = n == 'yes';
+    },
     loadChapter: function(id) {
       this.isLoading = true;
       fetch('https://risens.team/risensteam/api/chapter.php?id=' + id)
@@ -450,5 +461,13 @@ export default {
   color: white;
   font-size: 25px;
   cursor: pointer;
+}
+
+.night .controls {
+  background-color: #212529;
+}
+
+.night i {
+  color: white;
 }
 </style>
