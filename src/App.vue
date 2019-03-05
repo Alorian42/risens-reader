@@ -328,7 +328,7 @@ export default {
           type: 'error',
           title: 'Ошибка!',
           text: 'Скачка доступна только для наших патронов!',
-          footer: '<a href="patreon.risens.team">Поддержите нас на Патреоне...</a>'
+          footer: '<a href="https://patreon.risens.team" target="_blank">Поддержите нас на Патреоне...</a>'
         });
 
         return;
