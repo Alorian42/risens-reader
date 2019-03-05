@@ -235,14 +235,15 @@ export default {
       this.availLinks = this.links.slice(startAvail, endAvail);
     },
     imageOnClick: function(e) {
-      if (e.offsetX === undefined ||
-          e.path === undefined ||
-          !Array.isArray(e.path) ||
-          e.path[0] === undefined) {
+      if ((e.offsetX === undefined && e.layerX) ||
+          e.path === undefined && !e.composedPath && !e.composedPath()) {
+        this.nextPage();
         return;
       }
-      const xAxisClick = e.offsetX;
-      const imageWidth = e.path[0].width;
+      const path = e.path || (e.composedPath && e.composedPath());
+      const xAxisClick = e.offsetX === 0 ? e.layerX : e.offsetX;
+      const imageWidth = path[0].width;
+      console.log(xAxisClick, imageWidth);
 
       if (xAxisClick >= Math.floor(imageWidth / 2)) {
         this.nextPage();
