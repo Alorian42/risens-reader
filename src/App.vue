@@ -1,5 +1,5 @@
 <template>
-  <div id="app" v-bind:class="{ night: isNightMode }">
+  <div id="app" v-bind:class="{ night: forceNightMode }">
     <loading :active.sync="isLoading" 
         :can-cancel="false" 
         :is-full-page="true"></loading>
@@ -114,10 +114,6 @@ export default {
     numberOfPages: function() {
       return this.links.length;
     },
-    isNightMode: function() {
-      const n = $cookies.get('night');
-      return n == 'yes' || this.forceNightMode;
-    }
   },
   mounted() {
     this.$on('ChangePage', page => {
@@ -130,6 +126,19 @@ export default {
           this.loadChapter(this.chapters[this.currentChapter].id);
         }
     });
+
+    window.addEventListener('message', event => {
+      if (event.origin != 'https://risens.team') {
+        return;
+      }
+
+      if (event.data == 'night') {
+        this.checkNightMode();
+      }
+    });
+
+    const n = $cookies.get('night');
+    this.forceNightMode = n == 'yes';
     
     window.onkeyup = e => {
       let key = e.keyCode ? e.keyCode : e.which;
