@@ -103,7 +103,8 @@ export default {
       id: false,
       currentChapter: 0,
       chapters: [],
-      isLoading: true
+      isLoading: true,
+      isVip: false,
     }
   },
   computed: {
@@ -122,7 +123,6 @@ export default {
           this.loadChapter(this.chapters[this.currentChapter].id);
         }
     });
-
     
     window.onkeyup = e => {
       let key = e.keyCode ? e.keyCode : e.which;
@@ -134,6 +134,14 @@ export default {
         this.prevPage();
       }
     }
+
+    fetch('https://risens.team/risensteam/api/get_info.php').then(response => {
+      return response.json();
+    }).then(json => {
+      if (json.group == 1 || json.group == 6 || json.group == 10) {
+        this.isVip = true;
+      }
+    });
 
     const query = this.$route.query;
     let chapterId = false;
@@ -295,6 +303,17 @@ export default {
       }
     },
     downloadChapter: function() {
+      if (!this.isVip) {
+        Swal.fire({
+          type: 'error',
+          title: 'Ошибка!',
+          text: 'Скачка доступна только для наших патронов!',
+          footer: '<a href="patreon.risens.team">Поддержите нас на Патреоне...</a>'
+        });
+
+        return;
+      }
+
       this.isLoading = true;
       let urls = [];
       let zipName = this.chapters[this.currentChapter].name + '.zip';
@@ -341,31 +360,6 @@ export default {
             
             reader.readAsDataURL(blob);
           });
-/*
-          var httpRequest = new XMLHttpRequest();
-          httpRequest.open("GET", url);
-          httpRequest.responseType = 'blob';
-
-          httpRequest.onload = function() {
-            let reader = new FileReader();
-            reader.onloadend = function() {
-              let res = this.result;
-              let ext = 'jpg';
-              if (res.includes('data:image/png;base64')) {
-                  ext = 'png';
-              }
-              res = res.split(',', 2)[1];
-
-              let stringIndex = index + 1;
-
-              stringIndex = (stringIndex <= 9) ? '0' + stringIndex : stringIndex;
-              zip.file(stringIndex + '.' + ext, res, {base64: true});
-              resolve();
-            }
-            reader.readAsDataURL(this.response);
-          }
-
-          httpRequest.send();*/
         });
       };
 

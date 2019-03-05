@@ -100,4 +100,11 @@ select {
 .dropdown {
   border-radius: 5px;
 }
+
+.dropdown-toggle {
+  max-height: 35px;
+  text-overflow: clip;
+  overflow: hidden;
+  white-space: nowrap !important;
+}
 </style>
