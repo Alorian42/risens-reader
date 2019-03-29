@@ -1,5 +1,5 @@
 <template>
-  <div id="app" v-bind:class="{ night: forceNightMode }">
+  <div id="app" v-bind:class="{ night: forceNightMode, staticMode: staticMode }">
     <loading :active.sync="isLoading" :can-cancel="false" :is-full-page="true"></loading>
     <div class="text-center controls head">
       <arrow
@@ -9,6 +9,9 @@
         @click.native="prevPage"
       ></arrow>
       <page-selector :pages="links" :currentPageProp="currentPage"></page-selector>
+      <div @click="toggleMode">
+        <i title="Сменить режим" class="fas fa-search download-icon"></i>
+      </div>
       <arrow
         alt="Следующая страница"
         :isRight="true"
@@ -95,7 +98,8 @@ export default {
       chapters: [],
       isLoading: true,
       isVip: false,
-      forceNightMode: false
+      forceNightMode: false,
+      staticMode: true,
     };
   },
   computed: {
@@ -419,6 +423,9 @@ export default {
         "https://risens.team/risensteam/api/stat.php?type=3&id=" +
           this.chapters[this.currentChapter].id
       );
+    },
+    toggleMode: function() {
+      this.staticMode = !this.staticMode;
     }
   }
 };
@@ -450,7 +457,7 @@ body {
 }
 
 .bottom {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   width: 100%;
 }
