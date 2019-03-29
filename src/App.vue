@@ -432,11 +432,37 @@ export default {
 </script>
 
 <style lang="scss">
+#app::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	background-color: #F5F5F5;
+	border-radius: 10px;
+}
+
+#app::-webkit-scrollbar
+{
+	width: 10px;
+	background-color: #F5F5F5;
+}
+
+#app::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+	background-color: #eb5424;
+}
+
+.night#app::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+	background-color: #212529;
+}
+
 #app,
 body {
   padding: 0;
   margin: 0;
   width: 100vw;
+  overflow-x: hidden;
 }
 
 .ten {
@@ -463,9 +489,10 @@ body {
 }
 
 .head {
-  position: absolute;
+  position: fixed;
   top: 0;
   width: 100%;
+  z-index: 100;
 }
 
 .content {
@@ -493,5 +520,9 @@ body {
 
 .night i {
   color: white;
+}
+
+.staticMode#app {
+  overflow-y: hidden;
 }
 </style>
