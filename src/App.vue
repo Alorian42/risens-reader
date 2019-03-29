@@ -236,7 +236,6 @@ export default {
       const path = e.path || (e.composedPath && e.composedPath());
       const xAxisClick = e.offsetX === 0 ? e.layerX : e.offsetX;
       const imageWidth = path[0].width;
-      console.log(xAxisClick, imageWidth);
 
       if (xAxisClick >= Math.floor(imageWidth / 2)) {
         this.nextPage();
@@ -245,11 +244,10 @@ export default {
       }
     },
     smoothScroll: function() {
-      let currentScroll =
-        document.documentElement.scrollTop || document.body.scrollTop;
+      let currentScroll = this.$el.scrollTop;
       if (currentScroll > 0) {
         window.requestAnimationFrame(this.smoothScroll);
-        window.scrollTo(0, currentScroll - currentScroll / 5);
+        this.$el.scrollTo(0, currentScroll - currentScroll / 5);
       }
     },
     getChapters: function(id, chapterId = false) {
