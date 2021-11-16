@@ -10,7 +10,7 @@
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
   "dependencies": {
-    "aws-sdk": "^2.409.0",
+    "aws-sdk": "^2.814.0",
     "file-saver": "^2.0.1",
     "fs": "0.0.1-security",
     "jszip": "^3.2.0",
